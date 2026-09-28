@@ -1,0 +1,6 @@
+[Unit]
+Description=Update the CI/CD practice Airflow container from GHCR
+
+[Service]
+Type=oneshot
+ExecStart=%h/CICD_practice/scripts/update-airflow.sh

@@ -1,0 +1,22 @@
+name: cicd-practice
+
+services:
+  airflow:
+    image: ghcr.io/inerasable0203/cicd_practice:latest
+    container_name: airflow-practice
+    command: standalone
+    ports:
+      - 127.0.0.1:18081:8080
+    volumes:
+      - airflow-data:/opt/airflow
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:8080]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+
+volumes:
+  airflow-data:
+    name: cicd-practice-airflow-data

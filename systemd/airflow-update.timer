@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for a new CI/CD practice Airflow image
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+Unit=airflow-update.service
+
+[Install]
+WantedBy=timers.target

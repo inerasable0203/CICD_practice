@@ -4,5 +4,8 @@ LABEL org.opencontainers.image.source="https://github.com/inerasable0203/CICD_pr
 
 ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
 ENV AIRFLOW__CORE__PARALLELISM=2
+ENV AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow-image/dags
 
-COPY --chown=airflow:root dags/ /opt/airflow/dags/
+LABEL io.cicd-practice.persistent-dags="true"
+
+COPY --chown=airflow:root dags/ /opt/airflow-image/dags/
