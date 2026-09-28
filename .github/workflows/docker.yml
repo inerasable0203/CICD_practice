@@ -1,0 +1,39 @@
+name: Docker image
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t cicd-practice:ci .
+      - name: Run Airflow DAG
+        run: |
+          docker run --name airflow-check cicd-practice:ci bash -c 'airflow db migrate && airflow dags test sales_summary'
+          docker cp airflow-check:/tmp/sales_summary.csv actual_sales_summary.csv
+          diff -u tests/expected_sales_summary.csv actual_sales_summary.csv
+          docker rm airflow-check
+      - name: Log in to GHCR
+        if: github.event_name == 'push'
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Publish tested image
+        if: github.event_name == 'push'
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker tag cicd-practice:ci "$image:$GITHUB_SHA"
+          docker tag cicd-practice:ci "$image:latest"
+          docker push "$image:$GITHUB_SHA"
+          docker push "$image:latest"
