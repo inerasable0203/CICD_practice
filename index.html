@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CI/CD 실습 카운터</title>
+  <style>
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; font: 1rem/1.5 system-ui, sans-serif; background: #f1f5f9; color: #0f172a; }
+    main { width: min(90vw, 360px); padding: 2rem; text-align: center; background: white; border-radius: 1rem; box-shadow: 0 12px 32px #0f172a18; }
+    h1 { margin-top: 0; }
+    output { display: block; margin: 1rem 0; font-size: 4rem; font-weight: 700; }
+    button { padding: .7rem 1.2rem; border: 0; border-radius: .5rem; font: inherit; cursor: pointer; }
+    #increase { background: #2563eb; color: white; }
+    #reset { background: #e2e8f0; color: #0f172a; }
+    button:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>CI/CD 실습 카운터</h1>
+    <p>버튼을 눌러 숫자를 올려 보세요.</p>
+    <output id="count" aria-live="polite">0</output>
+    <button id="increase" type="button">+1</button>
+    <button id="reset" type="button">초기화</button>
+  </main>
+  <script>
+    const count = document.querySelector('#count');
+    document.querySelector('#increase').addEventListener('click', () => {
+      count.value = Number(count.value) + 1;
+    });
+    document.querySelector('#reset').addEventListener('click', () => {
+      count.value = 0;
+    });
+  </script>
+</body>
+</html>
