@@ -17,8 +17,8 @@ node --test tests/counter.test.mjs
 
 ## CI/CD 흐름
 
-1. Pull Request를 열면 페이지 검사가 실행됩니다.
-2. `main`에 push하면 같은 검사를 통과한 후 배포 파일을 artifact로 준비합니다.
+1. Pull Request에서 홈페이지 파일이 바뀌면 페이지 검사가 실행됩니다. 다른 파일만 바뀌면 필수 검사 `test`는 통과하되 페이지 테스트는 실행하지 않습니다.
+2. 홈페이지 파일을 `main`에 push하면 검사를 통과한 후 배포 파일을 artifact로 준비합니다. Airflow 파일만 바뀐 경우에는 홈페이지 테스트와 배포를 건너뜁니다.
 3. `github-pages` 환경에 수동 승인이 설정되어 있으면 승인 후 GitHub Pages에 배포됩니다.
 4. GitHub 저장소의 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 설정합니다.
 5. **Actions** 탭에서 `CI and Pages` 실행 결과를 확인합니다.
