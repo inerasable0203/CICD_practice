@@ -12,18 +12,38 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      site_changed: ${{ steps.changes.outputs.site_changed }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check site changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            changed=true
+          elif [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            git diff --quiet "$BASE_SHA...$HEAD_SHA" -- index.html tests/test_page.py tests/counter.test.mjs .github/workflows/pages.yml && changed=false || changed=true
+          else
+            git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- index.html tests/test_page.py tests/counter.test.mjs .github/workflows/pages.yml && changed=false || changed=true
+          fi
+          echo "site_changed=$changed" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v7
+        if: steps.changes.outputs.site_changed == 'true'
         with:
           node-version: '24'
       - name: Test page
+        if: steps.changes.outputs.site_changed == 'true'
         run: |
           python3 -m unittest discover -s tests
           node --test tests/counter.test.mjs
 
   build:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && needs.test.outputs.site_changed == 'true'
     needs: test
     runs-on: ubuntu-latest
     steps:

@@ -2,8 +2,20 @@ name: Docker image
 
 on:
   pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/docker.yml
+      - dags/**
+      - tests/expected_sales_summary.csv
   push:
     branches: [main]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - .github/workflows/docker.yml
+      - dags/**
+      - tests/expected_sales_summary.csv
 
 permissions:
   contents: read
