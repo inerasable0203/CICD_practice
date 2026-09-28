@@ -1,3 +1,6 @@
 *
 !Dockerfile
-!index.html
+!dags/
+!dags/**
+dags/__pycache__/
+*.pyc

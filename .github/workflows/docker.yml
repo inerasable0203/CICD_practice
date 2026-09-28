@@ -18,11 +18,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build image
         run: docker build -t cicd-practice:ci .
-      - name: Smoke test container
+      - name: Run Airflow DAG
         run: |
-          docker run -d --name cicd-practice -p 8080:80 cicd-practice:ci
-          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 http://localhost:8080/ | grep -q '<output id="count"'
-          docker stop cicd-practice
+          docker run --name airflow-check cicd-practice:ci bash -c 'airflow db migrate && airflow dags test sales_summary'
+          docker cp airflow-check:/tmp/sales_summary.csv actual_sales_summary.csv
+          diff -u tests/expected_sales_summary.csv actual_sales_summary.csv
+          docker rm airflow-check
       - name: Log in to GHCR
         if: github.event_name == 'push'
         env:

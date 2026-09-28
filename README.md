@@ -29,11 +29,15 @@ node --test tests/counter.test.mjs
 
 ## Docker 이미지 실습
 
-로컬에서 이미지를 만들고 실행합니다.
+Airflow 이미지에 매출 CSV를 읽어 카테고리별 합계를 만드는 `sales_summary` DAG를 넣었습니다. 로컬에서 이미지를 만들고 Airflow를 실행합니다.
 
 ```bash
-docker build -t cicd-practice:local .
-docker run --rm -p 8080:80 cicd-practice:local
+docker build -t airflow-practice:local .
+docker run -d --name airflow-practice -p 127.0.0.1:18081:8080 airflow-practice:local standalone
 ```
 
-<http://localhost:8080>에서 카운터를 확인합니다. `Docker image` 워크플로는 Pull Request에서 이미지를 빌드하고 HTTP 응답을 검사하며, `main`에서는 같은 이미지를 `ghcr.io/inerasable0203/cicd_practice`에 커밋 SHA와 `latest` 태그로 발행합니다. GHCR 패키지는 처음 생성되면 비공개일 수 있으므로, 인증 없이 내려받으려면 패키지 설정에서 공개로 변경해야 합니다.
+<http://localhost:18081>에서 `sales_summary` DAG를 실행합니다. 로그인 비밀번호는 `docker exec airflow-practice cat /opt/airflow/simple_auth_manager_passwords.json.generated`로 확인할 수 있습니다. DAG가 끝나면 `docker cp airflow-practice:/tmp/sales_summary.csv ./sales_summary.csv`로 결과를 가져오고, `docker stop airflow-practice`로 종료합니다. 결과는 `books=2000`, `stationery=300`입니다.
+
+`Docker image` 워크플로는 Pull Request에서 이미지를 빌드하고 DAG를 실행하며, `main`에서는 같은 이미지를 `ghcr.io/inerasable0203/cicd_practice`에 커밋 SHA와 `latest` 태그로 발행합니다. GHCR 패키지는 처음 생성되면 비공개일 수 있으므로, 인증 없이 내려받으려면 패키지 설정에서 공개로 변경해야 합니다.
+
+GHCR 발행 후에는 `docker pull ghcr.io/inerasable0203/cicd_practice:latest`로 내려받아 로컬 이미지 대신 실행할 수 있습니다.
