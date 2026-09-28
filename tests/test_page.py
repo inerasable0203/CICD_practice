@@ -35,7 +35,7 @@ class PageTest(unittest.TestCase):
         parser = PageParser()
         parser.feed(page.read_text(encoding="utf-8"))
         self.assertEqual(parser.lang, "ko")
-        self.assertEqual(parser.title, "CI/CD 실습 카운터-New branch")
+        self.assertEqual(parser.title, "CI/CD 실습 카운터-Ruleset")
         self.assertTrue({"count", "increase", "reset"} <= parser.ids)
 
 
