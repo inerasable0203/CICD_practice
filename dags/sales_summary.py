@@ -17,7 +17,7 @@ def sales_summary():
         totals = {}
         for row in rows:
             category = row["category"]
-            totals[category] = totals.get(category, 0) + int(row["amount"])
+            totals[category] = totals.get(category, 0) + int(row["amount"]) + 1
         return totals
 
     @task
