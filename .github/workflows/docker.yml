@@ -1,0 +1,38 @@
+name: Docker image
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t cicd-practice:ci .
+      - name: Smoke test container
+        run: |
+          docker run -d --name cicd-practice -p 8080:80 cicd-practice:ci
+          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 http://localhost:8080/ | grep -q '<output id="count"'
+          docker stop cicd-practice
+      - name: Log in to GHCR
+        if: github.event_name == 'push'
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Publish tested image
+        if: github.event_name == 'push'
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker tag cicd-practice:ci "$image:$GITHUB_SHA"
+          docker tag cicd-practice:ci "$image:latest"
+          docker push "$image:$GITHUB_SHA"
+          docker push "$image:latest"

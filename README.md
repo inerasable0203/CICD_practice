@@ -26,3 +26,14 @@ node --test tests/counter.test.mjs
 배포된 GitHub Pages 웹페이지는 공개됩니다.
 
 연습하려면 제목을 바꾸고 테스트의 예상 제목도 함께 수정한 뒤 Pull Request를 열어 보세요. 테스트가 실패하는 경우와 통과하는 경우를 모두 확인할 수 있습니다.
+
+## Docker 이미지 실습
+
+로컬에서 이미지를 만들고 실행합니다.
+
+```bash
+docker build -t cicd-practice:local .
+docker run --rm -p 8080:80 cicd-practice:local
+```
+
+<http://localhost:8080>에서 카운터를 확인합니다. `Docker image` 워크플로는 Pull Request에서 이미지를 빌드하고 HTTP 응답을 검사하며, `main`에서는 같은 이미지를 `ghcr.io/inerasable0203/cicd_practice`에 커밋 SHA와 `latest` 태그로 발행합니다. GHCR 패키지는 처음 생성되면 비공개일 수 있으므로, 인증 없이 내려받으려면 패키지 설정에서 공개로 변경해야 합니다.
