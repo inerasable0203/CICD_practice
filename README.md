@@ -36,8 +36,22 @@ docker build -t airflow-practice:local .
 docker run -d --name airflow-practice -p 127.0.0.1:18081:8080 airflow-practice:local standalone
 ```
 
-<http://localhost:18081>에서 `sales_summary` DAG를 실행합니다. 로그인 비밀번호는 `docker exec airflow-practice cat /opt/airflow/simple_auth_manager_passwords.json.generated`로 확인할 수 있습니다. DAG가 끝나면 `docker cp airflow-practice:/tmp/sales_summary.csv ./sales_summary.csv`로 결과를 가져오고, `docker stop airflow-practice`로 종료합니다. 결과는 `books=2000`, `stationery=300`입니다.
+<http://localhost:18081>에서 `sales_summary` DAG를 실행합니다. 로그인 비밀번호는 `docker exec airflow-practice cat /opt/airflow/simple_auth_manager_passwords.json.generated`로 확인할 수 있습니다. DAG가 끝나면 `docker cp airflow-practice:/tmp/sales_summary.csv ./sales_summary.csv`로 결과를 가져오고, `docker stop airflow-practice`로 종료합니다. 현재 결과는 `books=2500`, `stationery=300`입니다.
 
 `Docker image` 워크플로는 Pull Request에서 이미지를 빌드하고 DAG를 실행하며, `main`에서는 같은 이미지를 `ghcr.io/inerasable0203/cicd_practice`에 커밋 SHA와 `latest` 태그로 발행합니다. GHCR 패키지는 처음 생성되면 비공개일 수 있으므로, 인증 없이 내려받으려면 패키지 설정에서 공개로 변경해야 합니다.
 
 GHCR 발행 후에는 `docker pull ghcr.io/inerasable0203/cicd_practice:latest`로 내려받아 로컬 이미지 대신 실행할 수 있습니다.
+
+## 로컬 Airflow 자동 업데이트
+
+`main`에 새 Docker 이미지가 발행되면 로컬 타이머가 2분마다 GHCR을 확인하고 `airflow-practice`를 같은 `localhost:18081` 주소로 다시 만듭니다. PC가 켜져 있고 사용자 systemd가 실행 중일 때 동작합니다. 처음 전환할 때 기존 컨테이너의 `/opt/airflow`를 `cicd-practice-airflow-data` 볼륨으로 복사해 실행 기록과 로그인 비밀번호를 보존합니다. 기존 컨테이너는 `airflow-practice-before-compose`라는 이름으로 중지된 채 남깁니다.
+
+이 저장소가 `~/CICD_practice`에 있을 때 다음 명령으로 타이머를 등록합니다.
+
+```bash
+systemctl --user link "$PWD/systemd/airflow-update.service" "$PWD/systemd/airflow-update.timer"
+systemctl --user enable --now airflow-update.timer
+systemctl --user start airflow-update.service
+```
+
+마지막 명령은 업데이트를 바로 한 번 확인합니다. 새 이미지가 아직 발행되지 않았다면 기존 컨테이너를 유지하고 다음 확인을 기다립니다. 상태는 `systemctl --user status airflow-update.timer`와 `journalctl --user -u airflow-update.service -n 50`으로 볼 수 있습니다.
