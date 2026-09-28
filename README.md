@@ -17,4 +17,6 @@ python3 -m http.server 8000
 3. GitHub 저장소의 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 설정합니다.
 4. **Actions** 탭에서 `CI and Pages` 실행 결과를 확인합니다.
 
+비공개 저장소의 GitHub Pages는 GitHub Pro 이상에서 사용할 수 있습니다. 저장소가 비공개여도 배포된 웹페이지는 공개됩니다.
+
 연습하려면 제목을 바꾸고 테스트의 예상 제목도 함께 수정한 뒤 Pull Request를 열어 보세요. 테스트가 실패하는 경우와 통과하는 경우를 모두 확인할 수 있습니다.
